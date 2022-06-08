@@ -42,8 +42,8 @@ $ composer create-project –prefer-dist laravel/laravel myproject “5.8.*”
 ```
 
 #### Configuration
-##### 1. Run XAMPP. Click Start All. Localhost is available on http://localhost or htpp://127.0.0.1
-##### 2. Open Laravel project in the web browser on http://localhost/myproject/public/. Use the following commands to change the link from localhost/myproject/public to localhost/myproject:
+1. Run XAMPP. Click Start All. Localhost is available on http://localhost or htpp://127.0.0.1
+2. Open Laravel project in the web browser on http://localhost/myproject/public/. Use the following commands to change the link from localhost/myproject/public to localhost/myproject:
 ```
 # Go to myproject directory
 $ cd /Applications/XAMPP/xamppfiles/htdocs/myproject
@@ -54,7 +54,7 @@ $ mv server.php index.php
 # Copy the .htaccess file from /public directory to myproject root folder
 $ cp public/.htaccess ./
 ```
-##### 3. Connecting Laravel project to MySQL database: 
+#### Connecting Laravel project to MySQL database: 
 
 ###### Step 1: Create a database using the phpMyAdmin web interface (http://localhost/phpmyadmin) or using the 'mysql' command in the command line (/Applications/XAMPP/xamppfiles/mysql).
 
@@ -146,7 +146,7 @@ $ /Applications/XAMPP/xamppfiles/bin/php artisan cache:clear
 # run migration to update the database
 $ /Applications/XAMPP/xamppfiles/bin/php artisan migrate
 ```
-##### 4. Configure Model, View and Controllers
+#### Configure Model, View and Controllers
 ###### Step 1: Configure database and model (myproject/app/Models)
 Model is an entity in Laravel that communicates with the database. User 'make:model' artisan commadnd to create model for individual tables in the database. Models are stored in myproject/app/Models. View the file and manually edit the model to specify the table that will be used.
 ```
