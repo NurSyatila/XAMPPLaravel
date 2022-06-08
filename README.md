@@ -170,6 +170,6 @@ $ /Applications/XAMPP/xamppfiles/bin/php artisan make:controller SectionControll
 #manually edit the controller file to include functions for extracting and storing information
 ```
 
-For more details: https://github.com/NurSyatila/XAMPPLaravel/blob/main/sampledata/Database%20Development%20using%20Laravel%20and%20XAMPP.pdf
+For more details: https://github.com/NurSyatila/XAMPPLaravel/blob/main/Database%20Development%20using%20Laravel%20and%20XAMPP.pdf
 
 
