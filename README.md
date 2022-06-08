@@ -39,12 +39,11 @@ $ composer create-project –prefer-dist laravel/laravel myproject
 
 #OR to install a specific version of Laravel (e.g. Laravel 5.8)
 $ composer create-project –prefer-dist laravel/laravel myproject “5.8.*”
-
 ```
 
 #### Configuration
-1. Run XAMPP. Click Start All. Localhost is available on http://localhost or htpp://127.0.0.1
-2. Open Laravel project in the web browser on http://localhost/myproject/public/. Use the following commands to change the link from localhost/myproject/public to localhost/myproject:
+##### 1. Run XAMPP. Click Start All. Localhost is available on http://localhost or htpp://127.0.0.1
+##### 2. Open Laravel project in the web browser on http://localhost/myproject/public/. Use the following commands to change the link from localhost/myproject/public to localhost/myproject:
 ```
 # Go to myproject directory
 $ cd /Applications/XAMPP/xamppfiles/htdocs/myproject
@@ -55,7 +54,10 @@ $ mv server.php index.php
 # Copy the .htaccess file from /public directory to myproject root folder
 $ cp public/.htaccess ./
 ```
-3. Connecting Laravel project to MySQL database: Create a database using the phpMyAdmin web interface (http://localhost/phpmyadmin) or using the 'mysql' command in the command line (/Applications/XAMPP/xamppfiles/mysql).
+##### 3. Connecting Laravel project to MySQL database: 
+
+###### Step 1: Create a database using the phpMyAdmin web interface (http://localhost/phpmyadmin) or using the 'mysql' command in the command line (/Applications/XAMPP/xamppfiles/mysql).
+
 Sample data (truncated version):
   - approved_drugs.csv
   - drug_targets.csv
@@ -68,37 +70,104 @@ $ mkdir db
 
 # Download the data and store it in ‘db’ folder using curl or wget command
 $ curl -LJ -o db/approved_drugs.csv https://raw.githubusercontent.com/syatilanur/sampledata/main/approved_drugs.csv
-
 $ curl -LJ -o db/drug_targets.csv https://raw.githubusercontent.com/syatilanur/sampledata/main/drug_targets.csv
-
 $ curl -LJ -o db/target_sequences.csv https://raw.githubusercontent.com/syatilanur/sampledata/main/target_sequences.csv
 
-# Enter MySQL
-# By default, the username and password are ‘root’ and ‘’ 
+# Enter MySQL. By default, the username and password are ‘root’ and ‘’ 
 $ /Applications/XAMPP/xamppfiles/bin/mysql -u root -p (press Enter when ‘Enter password’ argument popup)
 
-# MySQL monitor will be displayed
-# show available databases
+# MySQL monitor will be displayed. Show available databases
 > SHOW DATABASES;
 
-# create a database named ‘drugdb’, CREATE DATABASE {database name}
+# Create a database named ‘drugdb’, CREATE DATABASE {database name}
 > CREATE DATABASE drugdb;
 > USE drugdb;
 
 # create tables, CREATE TABLE {Table name} ({Columns})
 
 # a) create approved_drugs table according to the column name in CSV file
-> CREATE TABLE approved_drugs (
-	drugbankid TEXT DEFAULT NULL, 
-	drugname TEXT DEFAULT NULL, 
-	drugtype TEXT DEFAULT NULL,	
- 	indication TEXT DEFAULT NULL,
-	pubchemid TEXT DEFAULT NULL,
-	hetid TEXT DEFAULT NULL);
+> CREATE TABLE approved_drugs ( drugbankid TEXT DEFAULT NULL, drugname TEXT DEFAULT NULL, drugtype TEXT DEFAULT NULL, indication TEXT DEFAULT NULL, pubchemid TEXT DEFAULT NULL, hetid TEXT DEFAULT NULL);
 # import the CSV file to be included as rows of the table
 > LOAD DATA LOCAL INFILE 'db/approved_drugs.csv' INTO TABLE approved_drugs FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
 
-```
+# b) create drug_targets table according to the column name in CSV file
+> CREATE TABLE drug_targets ( pharmaactive TEXT DEFAULT NULL, proteinname TEXT DEFAULT NULL, genename TEXT DEFAULT NULL, gbproteinid TEXT DEFAULT NULL, gbgeneid TEXT DEFAULT NULL, uniprotid TEXT DEFAULT NULL, uniprottitle TEXT DEFAULT NULL, pdbids TEXT DEFAULT NULL, species TEXT DEFAULT NULL, drugids TEXT DEFAULT NULL);
+# import the CSV file to be included as rows of the table
+> LOAD DATA LOCAL INFILE 'db/drug_targets.csv' INTO TABLE drug_targets FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
 
+# c) create target_sequences table according to the column name in CSV file
+> CREATE TABLE target_sequences (moleculetype TEXT DEFAULT NULL, uniprotid TEXT DEFAULT NULL, name TEXT DEFAULT NULL, drugids TEXT DEFAULT NULL, sequence TEXT DEFAULT NULL);
+# import the CSV file to be included as rows of the table
+> LOAD DATA LOCAL INFILE 'db/target_sequences.csv' INTO TABLE target_sequences FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
+
+# show tables in database drugdb that have been generated
+> SHOW TABLES;
+
+#exit MySQL monitor
+> exit
+```
+###### Step 2: Configure database connection and settings
+
+a. configure database connection in myproject/.env configuration file. Set DB_DATABASE to newly created database.
+```
+DB_CONNECTION=mysql
+DB_HOST=190.0.0.1
+DB_PORT=4008
+DB_DATABASE=drugdb
+DB_USERNAME=root
+DB_PASSWORD=
+```
+b. configure a database connection in myproject/config/database.php. Set the 'database', 'username', and 'password'.
+```
+        'mysql' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'drugdb'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+```
+c. Use the ‘migrate’ artisan command to connect the database to Laravel. Note: User php command from XAMPP to prevent errors.
+```
+#clear the cache after changing the configuration
+$ /Applications/XAMPP/xamppfiles/bin/php artisan cache:clear
+# run migration to update the database
+$ /Applications/XAMPP/xamppfiles/bin/php artisan migrate
+```
+##### 4. Configure Model, View and Controllers
+###### Step 1: Configure database and model (myproject/app/Models)
+Model is an entity in Laravel that communicates with the database. User 'make:model' artisan commadnd to create model for individual tables in the database. Models are stored in myproject/app/Models. View the file and manually edit the model to specify the table that will be used.
+```
+#create model for individual tables
+$ /Applications/XAMPP/xamppfiles/bin/php artisan make:model ApprovedDrugs
+$ /Applications/XAMPP/xamppfiles/bin/php artisan make:model DrugTargets
+$ /Applications/XAMPP/xamppfiles/bin/php artisan make:model TargetSequences
+#open each file and manually edit the 'protected $table' variable,
+# e.g. ApprovedDrugs; table = approved_drugs, Drugtargets; table = drug_targets,  e.g. TargetSequences; table = target_sequences
+```
+###### Step 2: Configure views (myproject/resources/views, myproject/routes/web.php) and controllers (myproject/app/Http/COntrollers)
+
+**Routes**: The web.php (myproject/routes/web.php) defines all routes for web interfaces that are connected to PHP files from the view entity in Laravel.  
+
+**Views** contain the HTML or PHP codes that are stored with prefix blade.php (myproject/resources/views). Views serves as the front-end side of the website which present the data to users. The default homepage for myproject website is located at myproject/resources/views/welcome.blade.php. The welcome.blade.php can be edited to fit the purpose of the website, such as to include a query to a selected table in the database or to include a link to another section.   
+
+**Controller** organizes request handling (myproject/app/Http/Controllers/). The 'make:controller' artisan command can be used to create a controller file. For starting, we can create a single controller that communicates with the tables in selected database, extract necessary information and produce a view containing the list of the information we needed on the web page.   
+```
+#to create a controller
+$ /Applications/XAMPP/xamppfiles/bin/php artisan make:controller SectionController
+#manually edit the controller file to include functions for extracting and storing information
+```
 
 
